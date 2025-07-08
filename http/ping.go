@@ -6,7 +6,15 @@ import (
 	must "ping-rush/exception"
 )
 
-// todo: Pings - several urls
+func Pings(urls []string) int {
+	response := 200
+
+	for _, url := range urls {
+		response = must.Must(Ping(url))
+	}
+
+	return response
+}
 
 func Ping(url string) (int, error) {
 	if url == "" {
