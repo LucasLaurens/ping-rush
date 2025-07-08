@@ -12,21 +12,23 @@ type Result struct {
 }
 
 func Pings(urls []string) []Result {
-	channel := make(chan int, len(urls))
+	channel := make(chan Result, len(urls))
 
 	for _, url := range urls {
 		go func(url string) {
-			code := must.Must(Ping(url))
-			channel <- code
+			channel <- Result{
+				url:  url,
+				code: must.Must(Ping(url)),
+			}
 		}(url)
 	}
 
 	results := make([]Result, 0, len(urls))
 	for i := 0; i < len(urls); i++ {
-		code := <-channel
+		result := <-channel
 		results = append(results, Result{
-			url:  urls[i],
-			code: code,
+			url:  result.url,
+			code: result.code,
 		})
 	}
 
