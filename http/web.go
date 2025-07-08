@@ -3,21 +3,20 @@ package web
 import (
 	"errors"
 	"net/http"
+	must "ping-rush/exception"
 )
+
+// todo: Pings - several urls
 
 func Ping(url string) (int, error) {
 	if url == "" {
-		return 500, errors.New("empty URL")
+		return http.StatusBadRequest, errors.New(
+			"the url cannot be empty",
+		)
 	}
 
-	response, err := http.Get(url)
-	if err != nil {
-		return response.StatusCode, err
-	}
-
+	response := must.Must(http.Get(url))
 	defer response.Body.Close()
 
 	return response.StatusCode, nil
 }
-
-// todo: Pings - several urls
