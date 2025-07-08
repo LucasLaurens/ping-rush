@@ -22,12 +22,12 @@ func TestPingServeralUrl(t *testing.T) {
 		results := Pings(value.urls)
 
 		for url, actual := range results {
-			if actual != value.expected {
+			if actual.code != value.expected {
 				t.Errorf(
 					"the '%v' url status code expected %d but received %d",
 					url,
 					value.expected,
-					actual,
+					actual.code,
 				)
 			}
 		}
