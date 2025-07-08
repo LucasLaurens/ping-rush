@@ -6,14 +6,16 @@ import (
 	must "ping-rush/exception"
 )
 
-func Pings(urls []string) int {
-	response := 200
+// todo: use go routine
+func Pings(urls []string) map[string]int {
+	results := make(map[string]int)
 
 	for _, url := range urls {
-		response = must.Must(Ping(url))
+		status := must.Must(Ping(url))
+		results[url] = status
 	}
 
-	return response
+	return results
 }
 
 func Ping(url string) (int, error) {

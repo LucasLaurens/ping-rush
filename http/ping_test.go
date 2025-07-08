@@ -1,60 +1,63 @@
 package web
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestPingServeralUrl(t *testing.T) {
 	value := struct {
-		name string
-		urls []string
-		code int
+		name     string
+		urls     []string
+		expected int
 	}{
 		name: "several urls test case",
 		urls: []string{
 			"https://www.google.com/",
 			"https://fr.wikipedia.org/",
 		},
-		code: 200,
+		expected: 200,
 	}
 
 	t.Run(value.name, func(t *testing.T) {
-		code := Pings(value.urls)
+		results := Pings(value.urls)
 
-		if code != value.code {
-			t.Errorf(
-				"the value returned status code %d; expected %d",
-				code,
-				value.code,
-			)
+		for url, actual := range results {
+			if actual != value.expected {
+				t.Errorf(
+					"the '%v' url status code expected %d but received %d",
+					url,
+					value.expected,
+					actual,
+				)
+			}
 		}
 	})
 }
 
 func TestPingUrl(t *testing.T) {
 	value := struct {
-		name string
-		url  string
-		code int
+		name     string
+		url      string
+		expected int
 	}{
-		name: "google test case",
-		url:  "https://www.google.com/",
-		code: 200,
+		name:     "google test case",
+		url:      "https://www.google.com/",
+		expected: 200,
 	}
 
 	t.Run(value.name, func(t *testing.T) {
-		code, err := Ping(value.url)
+		acutal, err := Ping(value.url)
 
 		if err != nil {
 			t.Fatalf("failed to GET %s: %v", value.url, err)
 		}
 
-		if code != value.code {
+		if acutal != value.expected {
 			t.Errorf(
 				"the value returned status code %d; expected %d",
-				code,
-				value.code,
+				acutal,
+				value.expected,
 			)
 		}
 	})
 }
-
-// todo: test bad url
