@@ -12,8 +12,26 @@ func TestPingServeralUrl(t *testing.T) {
 	}{
 		name: "several urls test case",
 		urls: []string{
+			"https://go.dev/doc/",
+			"https://www.bbc.com/",
+			"https://www.apple.com/",
+			"https://www.twitch.tv/",
+			"https://www.adobe.com/",
 			"https://www.google.com/",
-			"https://fr.wikipedia.org/",
+			"https://www.amazon.com/",
+			"https://www.lemonde.fr/",
+			"https://www.reddit.com/",
+			"https://www.github.com/",
+			"https://www.medium.com/",
+			"https://www.dropbox.com/",
+			"https://www.youtube.com/",
+			"https://www.facebook.com/",
+			"https://www.linkedin.com/",
+			"https://www.wikipedia.org/",
+			"https://www.microsoft.com/",
+			"https://www.instagram.com/",
+			"https://www.salesforce.com/",
+			"https://www.stackoverflow.com/",
 		},
 		expected: 200,
 	}
@@ -21,13 +39,13 @@ func TestPingServeralUrl(t *testing.T) {
 	t.Run(value.name, func(t *testing.T) {
 		results := Pings(value.urls)
 
-		for url, actual := range results {
-			if actual.code != value.expected {
+		for _, result := range results {
+			if result.code != value.expected {
 				t.Errorf(
-					"the '%v' url status code expected %d but received %d",
-					url,
+					"the %v url expected %d status code but received %d",
+					result.url,
 					value.expected,
-					actual.code,
+					result.code,
 				)
 			}
 		}
