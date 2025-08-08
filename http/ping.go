@@ -1,50 +1,77 @@
 package web
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	must "ping-rush/exception"
+	"sync"
 )
 
 type Result struct {
 	url  string
 	code int
+	err  error
 }
 
 func Pings(urls []string) []Result {
-	channel := make(chan Result)
-	results := make([]Result, len(urls))
+	// Define context to manage error from goroutines
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
+	// Prepare sync to wait until all goroutines are complete before continuing processing
+	var wg sync.WaitGroup
+	// Buffer to prevent blocking
+	channel := make(chan Result, len(urls))
+	// Empty slice with capacity for URLs
+	results := make([]Result, 0, len(urls))
+
+	// Add as many tasks as there are URLs
+	wg.Add(len(urls))
 	for index, url := range urls {
-		// todo: manage error from goroutine to stop the process during execution
-		// note: use sync.Group
 		go func(occurence int, url string) {
+			// It indicates when the goroutine is finished
+			defer wg.Done()
+
 			fmt.Printf(
 				"The %d processing task is running...\n",
 				occurence,
 			)
 
-			channel <- Result{
-				url:  url,
-				code: must.Must(Ping(url)),
+			select {
+			// We exit if the context is canceled, so errors occurs
+			case <-ctx.Done():
+				return
+			default:
+				code, err := Ping(url)
+				if err != nil {
+					// If an error occurs when pinging an URL, everything is canceled
+					cancel()
+				}
+
+				channel <- Result{
+					url:  url,
+					code: code,
+					err:  err,
+				}
 			}
 		}(index+1, url)
 	}
 
-	for i := 0; i < len(urls); i++ {
-		result := <-channel
-		results[i] = Result{
-			url:  result.url,
-			code: result.code,
-		}
+	// Close the channel after all goroutines have finished
+	go func() {
+		wg.Wait()
+		close(channel)
+	}()
+
+	for result := range channel {
+		results = append(results, result)
 	}
 
-	fmt.Println("The processing task is complete !")
 	return results
 }
 
-// note: should i pass with pointer on receiver ?
 func Ping(url string) (int, error) {
 	if url == "" {
 		return http.StatusBadRequest, errors.New(
